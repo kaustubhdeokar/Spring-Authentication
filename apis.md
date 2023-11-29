@@ -56,7 +56,7 @@
 2. Structure permission flow.
    - Admin user adding structure admin permission to a user for a particular structure.
      - ![structure-perm.png](img/11-admin-user-adding-admin-permission-for-structure-1.png)
-   - User having admin permission for a structure, able to assign specific permissions for different users for the same structure.
+   - User having admin permission for a structure, able to assign specific permissionsMapping for different users for the same structure.
      - read
        - - ![structure-perm.png](img/11-structure-admin-user-adding-read-permission-for-user.png)
      - write

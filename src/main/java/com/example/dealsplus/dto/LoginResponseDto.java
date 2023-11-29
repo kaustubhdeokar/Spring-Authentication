@@ -9,7 +9,7 @@ import java.time.Instant;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
+public class LoginResponseDto {
     private String username;
     private String authenticationToken;
     private String refreshToken;

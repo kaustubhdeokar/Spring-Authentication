@@ -1,9 +1,8 @@
 package com.example.dealsplus.controller;
 
 import com.example.dealsplus.dto.StructureDto;
-import com.example.dealsplus.repo.UserRepo;
+import com.example.dealsplus.model.Structure;
 import com.example.dealsplus.service.StructureService;
-import com.example.dealsplus.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,21 +19,12 @@ import java.util.List;
 public class StructureController {
 
     //todo: read why autowiring is not recommended ?
-    //
+
     @Autowired
     private StructureService structureService;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private AuthUtil authUtil;
-
-    public StructureController(StructureService structureService, UserRepo userRepo, UserDetailsServiceImpl userDetailsService) {
+    public StructureController(StructureService structureService) {
         this.structureService = structureService;
-        this.userRepo = userRepo;
-        this.userDetailsService = userDetailsService;
     }
 
     @GetMapping("/get-all")
@@ -44,26 +34,34 @@ public class StructureController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PostMapping("/edit/{structureName}")
-    public ResponseEntity<String> editStructure(@RequestBody StructureDto structureDto) {
+    @GetMapping("/get-by-name/{structure}")
+    public ResponseEntity<StructureDto> getStructureByName(@PathVariable String structure) {
+        Structure struct = structureService.getStructure(structure);
+        StructureDto structureDto = structureService.getStructureDto(struct);
+        return new ResponseEntity<>(structureDto, HttpStatus.OK);
+    }
 
+    @PostMapping("/read/{structureName}")
+    public ResponseEntity<StructureDto> readStructure(@PathVariable String structureName) {
+        StructureDto structureDto = structureService.readStructure(structureName);
+        return new ResponseEntity<>(structureDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<String> createStructure(@RequestBody StructureDto structure) {
+        String structureName = structureService.createService(structure);
+        return new ResponseEntity<>("structure created: " + structureName, HttpStatus.OK);
+    }
+
+    @PostMapping("/edit")
+    public ResponseEntity<String> editStructure(@RequestBody StructureDto structureDto) {
+        structureService.updateStructure(structureDto);
         return new ResponseEntity<>("structure edited.", HttpStatus.OK);
     }
 
     @PostMapping("/delete/{structureName}")
     public ResponseEntity<String> deleteStructure(@PathVariable String structureName) {
-
-        return new ResponseEntity<>("structure deleted.", HttpStatus.OK);
-    }
-
-    @PostMapping("/read/{structureName}")
-    public ResponseEntity<String> readStructure(@PathVariable String structureName) {
-
-        return new ResponseEntity<>("structure created.", HttpStatus.OK);
-    }
-
-    @PostMapping("/create")
-    public ResponseEntity<String> createStructure(@RequestBody StructureDto structure) {
-        return new ResponseEntity<>("structure created.", HttpStatus.OK);
+        structureService.deleteStructure(structureName);
+        return new ResponseEntity<>("Structure deleted.", HttpStatus.OK);
     }
 }

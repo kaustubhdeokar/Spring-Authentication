@@ -1,10 +1,9 @@
 package com.example.dealsplus.service;
 
-import com.example.dealsplus.dto.AuthenticationResponse;
-import com.example.dealsplus.dto.RefreshTokenRequest;
+import com.example.dealsplus.dto.LoginResponseDto;
+import com.example.dealsplus.dto.RefreshTokenRequestDto;
 import com.example.dealsplus.dto.RegisterUserDto;
 import com.example.dealsplus.exception.CustomException;
-import com.example.dealsplus.model.NotificationEmail;
 import com.example.dealsplus.model.Role;
 import com.example.dealsplus.model.User;
 import com.example.dealsplus.model.VerificationToken;
@@ -71,7 +70,7 @@ public class AuthService {
             throw new CustomException("User already exists");
         }
 
-        Role basicUserRole = roleService.getRole("USER");
+        Role basicUserRole = roleService.getRoleFromRepo("USER");
 
         User user = new User(registerUserDto.getUsername(),
                 passwordEncoder.encode(registerUserDto.getPassword()),
@@ -129,7 +128,7 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    public AuthenticationResponse loginUser(String username, String password) {
+    public LoginResponseDto loginUser(String username, String password) {
 
         User user = userRepo.findByUsername(username).orElseThrow(() -> new CustomException("Invalid username"));
         if (user.isEnabled()) {
@@ -138,14 +137,14 @@ public class AuthService {
                 String jwtToken = jwtProvider.generateToken(auth);
                 String refreshToken = refreshTokenService.generateRefreshToken().getToken();
                 Instant expiry = Instant.now().plusMillis(JwtTokenProvider.JWT_EXPIRATION);
-                return new AuthenticationResponse(username, jwtToken, refreshToken, expiry);
+                return new LoginResponseDto(username, jwtToken, refreshToken, expiry);
             } catch (AuthenticationServiceException e) {
-                return new AuthenticationResponse(null, e.getMessage(), null, null);
+                return new LoginResponseDto(null, e.getMessage(), null, null);
             } catch (DisabledException e) {
                 throw new CustomException(HttpStatus.BAD_REQUEST, "User is disabled. Please verify the user.: " + username);
             } catch (BadCredentialsException th) {
 //                handleIncorrectCredentials(username, user);
-                return new AuthenticationResponse(null, th.getMessage(), null, null);
+                return new LoginResponseDto(null, th.getMessage(), null, null);
             }
         } else {
             throw new CustomException(HttpStatus.BAD_REQUEST,
@@ -165,12 +164,12 @@ public class AuthService {
 //                "Incorrect credentials for username: " + username + ". You have " + (3 - attempts) + " attempts remaining.");
     }
 
-    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+    public LoginResponseDto refreshToken(RefreshTokenRequestDto refreshTokenRequestDto) {
+        refreshTokenService.validateRefreshToken(refreshTokenRequestDto.getRefreshToken());
         String token = "jwtProvider.generateToken(refreshTokenRequest.getUsername())";
-        String refreshToken = refreshTokenRequest.getRefreshToken();
+        String refreshToken = refreshTokenRequestDto.getRefreshToken();
         Instant expiry = Instant.now().plusMillis(JwtTokenProvider.JWT_EXPIRATION);
-        return new AuthenticationResponse(refreshTokenRequest.getUsername(), token, refreshToken, expiry);
+        return new LoginResponseDto(refreshTokenRequestDto.getUsername(), token, refreshToken, expiry);
     }
 
     public User getUser(String username) {
@@ -178,21 +177,14 @@ public class AuthService {
     }
 
 
-    public void getRolesForUser(String username) {
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new CustomException("User not found with id -" + username));
-        Optional<List<Object[]>> rolesByUserid = userRepo.findRolesByUserId(user.getUserId());
-        for (Object role : rolesByUserid.get()) {
-            System.out.println(role);
-        }
-    }
-
     public void resetPasswordForEmail(String email) {
-        Optional<User> byEmail = userRepo.findByEmail(email);
-        if (byEmail.isPresent()) {
-            User user = byEmail.get();
-            VerificationToken verificationToken = tokenRepo.findByUser(user).orElseThrow(() -> new CustomException("Not token found for user"));
-            mailService.sendEmail(new NotificationEmail("Account activation", user.getEmail(), formResetPasswordBody(verificationToken.getToken())));
-        }
+//        Optional<User> byEmail = userRepo.findByEmail(email);
+//        if (byEmail.isPresent()) {
+//            User user = byEmail.get();
+//            VerificationToken verificationToken = tokenRepo.findByUser(user).orElseThrow(() -> new CustomException("Not token found for user"));
+//            mailService.sendEmail(new NotificationEmail("Account activation", user.getEmail(), formResetPasswordBody(verificationToken.getToken())));
+//        }
+        //todo: to implement.
     }
 
     public void setPasswordForUser(User userByToken, String newpassword) {

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,14 +14,14 @@ import java.util.Set;
 public class Structure {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long structureId;
 
     @Column(unique = true)
     private String structureName;
 
-//    @OneToMany(mappedBy = "structureId", cascade = CascadeType.ALL)
-//    private Set<UserRoleMapping> userRoleMappings;
+    private String structureInfo;
+
 
     public Structure(String structureName) {
         this.structureName = structureName;

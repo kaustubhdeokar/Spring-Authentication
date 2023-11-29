@@ -1,45 +1,91 @@
-# Dealsplus - backend assignment
+# Roles and permission handling in spring boot.
 
-## **Objective**:
+An entity - structures.
+Access control is done on structure entity through roles and permissions.
 
-We are going to develop a compact authentication and authorisation module for Dealsplus.
+- Role to permission mapping.
+```
+USER(USER_ROLE),
+STRUCTURE_READ_AUTHORITY("structure:read"),
+STRUCTURE_EDIT_AUTHORITY("structure:read,structure:update"),
+STRUCTURE_ADMIN_AUTHORITY("structure:read,structure:update,structure:create,structure:delete"),
+ADMIN(ADMIN_ROLE);
+```
 
-## Context:
+- Admin role has super access.
 
-- Dealsplus manages multiple investments (also called structures) of a private equity fund. Each structure holds various data relevant for the fund to manage that investment (equity data, data of different companies in that investment ..). we have different types of users, there are some users who should only read the structure data and others can write as well, hence there is a need to have role based access control
-- Different types of roles :
-    - Global admin : - 
-        - can read, write, delete on all structure data - Done.
-        - Manage roles and permissions for other users - Done.
-    - Structure reader on structure X:
-        - can read on a particular structure data - Done.
-    - Structure admin on structure X:
-        - can read, write, delete on a given structure data - Done.
-        - Can add / remove a structure reader - Done
-- A point to note here is a given user can have multiple roles, they can be a reader on structure X, admin on structure Y, reader on structure Z - Done
+- With a structure admin role - all CRUD operations are possible on the entity.
+- With a structure read role -  all read operations are possible on the entity.
+- With a structure edit role -  all write/update operations are possible on the entity.
 
-### Requirements:
+Users | Create | Read | Update | Delete |
+--- |--------|------|--------|--------|
+Structure Read | No     | Yes  | No     | No  
+Structure Update/Edit  | No     | Yes  | Yes     | No  
+Structure Admin  | Yes    | Yes  | Yes     | Yes  
 
-- Done : Create a User with attributes like username, email, password, roles
-- Done : Implement relevant endpoints for user registration, login, and role management .. 
-- Done: Implement password hashing
-- Done: Support user account locking after multiple failed login attempts.
-- Done: Implement password reset functionality with 
-- Done: email-based verification.
+### Operation by structure read role
 
-### **;Evaluation Criteria (non-exhaustive):**
+  ---------
 
-- Proper implementation of CRUD operations using appropriate HTTP methods and status codes.
-- Adherence to REST principles and best practices.
-- Correct usage of Spring Boot annotations and dependencies (for Java).
-- Proper exception handling and error responses.
-- Code quality, readability, and adherence to Java best practices.
-- Clear and concise documentation on how to run and test the API.
 
-### Submission:
+ 
+- Roles assigned
+- - ![Roles assigned](res/structure-read/roles-assigned.png)  
+- Read all
+- - ![Read all](res/structure-read/read-all.png)
 
-- Submit your code by creating a private github link
-- Deploy your REST API’s on a hosting platform of your choice
-- Share the submission to sai@dealsplus.io
+- Read by name
+- - ![Read by name](res/structure-read/roles-assigned.png)
+
+- Structure Edit fails due to auth error
+- - ![Edit failed](res/structure-read/structure-edit-failed.png)
+
+- Structure Create fails due to auth error
+- - ![Create failed](res/structure-read/create-fail.png)
+
+- Structure Delete fails due to auth error
+- - ![Delete failed](res/structure-read/delete-fails.png)
+
+
+### Operations by structure_edit_role (write/edit possible)
+
+- Registration
+- - ![Registration](res/structure-edit/registeration.png)
+
+- Login
+- - ![Login](res/structure-edit/login.png)
+
+- Roles assigned
+- - ![Roles assigned](res/structure-edit/roles-assigned.png)
+
+- Get all structures
+- - ![Roles assigned](res/structure-edit/get-all.png)
+
+- Edit done
+- - ![Edit done](res/structure-edit/structure_edit.png)
+
+- Delete fails
+- - ![Delete fails](res/structure-edit/delete-failed.png)
+
+- Create fails
+- - ![Create fails](res/structure-edit/create-failed.png)
+
+### Operations by structure_admin_user
+
+- Read operation
+![res/structure-admin/read-operation-by-structure-admin.png](res/structure-admin/read-operation-by-structure-admin.png)
+
+- Create structure operation
+![res/read-operation-by-structure-admin.png](res/structure-admin/read-operation-by-structure-admin.png)
+
+- Delete structure
+![res/delete-by-structure-admin.png](res/structure-admin/delete-by-structure-admin.png)
+
+- Update structure
+![res/structure-edit-structure-admin.png](res/structure-admin/structure-edit-structure-admin.png)
+
+- Get by name
+![res/structure-by-name-structure-admin.png](res/structure-admin/structure-by-name-structure-admin.png)
 
 

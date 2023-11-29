@@ -1,8 +1,8 @@
 package com.example.dealsplus.controller;
 
-import com.example.dealsplus.dto.AuthenticationResponse;
+import com.example.dealsplus.dto.LoginResponseDto;
 import com.example.dealsplus.dto.LoginRequestDto;
-import com.example.dealsplus.dto.RefreshTokenRequest;
+import com.example.dealsplus.dto.RefreshTokenRequestDto;
 import com.example.dealsplus.dto.RegisterUserDto;
 import com.example.dealsplus.model.User;
 import com.example.dealsplus.model.VerificationToken;
@@ -35,6 +35,11 @@ public class AuthController {
         return new ResponseEntity<>("Registration done.", HttpStatus.OK);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> loginUser(@RequestBody LoginRequestDto registerUserDTO) {
+        return new ResponseEntity<>(service.loginUser(registerUserDTO.getUsername(), registerUserDTO.getPassword()), HttpStatus.OK);
+    }
+
     @GetMapping("/accountVerification/{token}")
     public ResponseEntity<String> verifyAccount(@PathVariable String token) {
         VerificationToken verificationToken = service.verifyToken(token);
@@ -42,21 +47,16 @@ public class AuthController {
         return new ResponseEntity<>("account verified.", HttpStatus.OK);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> loginUser(@RequestBody LoginRequestDto registerUserDTO) {
-        return new ResponseEntity<>(service.loginUser(registerUserDTO.getUsername(), registerUserDTO.getPassword()), HttpStatus.OK);
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
+        refreshTokenService.deleteRefreshToken(refreshTokenRequestDto.getRefreshToken());
+        return ResponseEntity.status(HttpStatus.OK).body("Logged out.");
     }
 
     @PostMapping("/refresh/token")
-    public ResponseEntity<AuthenticationResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
-        AuthenticationResponse authenticationResponse = service.refreshToken(refreshTokenRequest);
-        return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
-        refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
-        return ResponseEntity.status(HttpStatus.OK).body("Logged out.");
+    public ResponseEntity<LoginResponseDto> refreshToken(@Valid @RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
+        LoginResponseDto loginResponseDto = service.refreshToken(refreshTokenRequestDto);
+        return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
     }
 
 

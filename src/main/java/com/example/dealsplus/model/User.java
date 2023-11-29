@@ -9,7 +9,6 @@ import lombok.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,12 +17,13 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Table(name = "user")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue
     private Long userId;
     @NotBlank(message = "Username is required")
+    @Column(unique = true)
     private String username;
     @NotBlank(message = "Password is required")
     private String password;
@@ -34,8 +34,7 @@ public class User {
     private boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "users_roles",
+    @JoinTable(name = "users_roles",
             joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "roleId")})
     private List<Role> roles = new ArrayList<>();
@@ -45,6 +44,6 @@ public class User {
         this.password = password;
         this.email = email;
         this.created = Instant.now();
-        this.enabled = false;
+        this.enabled = true;
     }
 }
