@@ -8,6 +8,7 @@ import com.example.dealsplus.model.User;
 import com.example.dealsplus.model.VerificationToken;
 import com.example.dealsplus.service.AuthService;
 import com.example.dealsplus.service.RefreshTokenService;
+import com.example.dealsplus.service.UserDetailsServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,6 +25,8 @@ public class AuthController {
     private AuthService service;
     @Autowired
     private RefreshTokenService refreshTokenService;
+
+    @Autowired private UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody RegisterUserDto registerUserDto) {
@@ -76,7 +79,6 @@ public class AuthController {
     public void completeResetPassword(@PathVariable String token, @PathVariable String newpassword){
         User userByToken = service.getUserByToken(token);
         service.setPasswordForUser(userByToken, newpassword);
-
     }
 
 

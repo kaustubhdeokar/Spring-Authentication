@@ -51,32 +51,38 @@ public class StructureService {
     }
 
     public void addReadPermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty()) {
-            throw new CustomException("User not present");
-        }
+        Optional<User> optionalUser = getUser(username);
         User user = optionalUser.get();
         structure.getUserWithReadPerm().add(user);
         saveStructure(structure);
     }
 
     public void addWritePermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = userRepo.findByUsername(username);
-        if (optionalUser.isEmpty()) {
-            throw new CustomException("User not present");
-        }
+        Optional<User> optionalUser = getUser(username);
         User user = optionalUser.get();
         structure.getUserWithWritePerm().add(user);
         saveStructure(structure);
     }
 
-    public void addDeletePermissionForUser(Structure structure, String username) {
+    private Optional<User> getUser(String username) {
         Optional<User> optionalUser = userRepo.findByUsername(username);
         if (optionalUser.isEmpty()) {
             throw new CustomException("User not present");
         }
+        return optionalUser;
+    }
+
+    public void addDeletePermissionForUser(Structure structure, String username) {
+        Optional<User> optionalUser = getUser(username);
         User user = optionalUser.get();
         structure.getUserWithDeletePerm().add(user);
+        saveStructure(structure);
+    }
+
+    public void addAdminPermissionForUser(Structure structure, String username) {
+        Optional<User> optionalUser = getUser(username);
+        User user = optionalUser.get();
+        structure.getUserWithAdminPerm().add(user);
         saveStructure(structure);
     }
 }

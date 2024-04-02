@@ -57,6 +57,9 @@ public class AuthService {
     private static int attempts = 0;
     private boolean bPasswordResetDone = true;
 
+    @Autowired
+    UserDetailsServiceImpl userDetailsService;
+
     public boolean signup(RegisterUserDto registerUserDto) throws DataIntegrityViolationException {
 
         checkIfUserAlreadyExists(registerUserDto);
@@ -133,8 +136,8 @@ public class AuthService {
 
     public AuthenticationResponse loginUser(String username, String password) {
 
-        if (bPasswordResetDone) {
-
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new CustomException("Invalid username"));
+        if (user.isEnabled()) {
             try {
                 Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
                 String jwtToken = jwtProvider.generateToken(auth);
@@ -144,23 +147,28 @@ public class AuthService {
             } catch (AuthenticationServiceException e) {
                 return new AuthenticationResponse(null, e.getMessage(), null, null);
             } catch (DisabledException e) {
-                return new AuthenticationResponse(null, "User is disabled. Please verify the user.", null, null);
-            } catch (BadCredentialsException th) {
-                attempts += 1;
-                if (attempts > 2) {
-                    bPasswordResetDone = false;
-                    throw new CustomException(HttpStatus.BAD_REQUEST,
-                            String.format("Account is locked, please reset the password: ", username));
-                }
                 throw new CustomException(HttpStatus.BAD_REQUEST,
-                        String.format("Incorrect credentials for username: ", username) + ". You have " + (3 - attempts) + " attempts remaining.");
+                        "User is disabled. Please verify the user.: " + username);
+            } catch (BadCredentialsException th) {
+                handleIncorrectCredentials(username, user);
+                return new AuthenticationResponse(null, th.getMessage(), null, null);
             }
-
         } else {
             throw new CustomException(HttpStatus.BAD_REQUEST,
-                    String.format("Account is locked, please reset the password: ", username));
+                    "Account is locked, please reset the password: " + username);
         }
 
+    }
+
+    private void handleIncorrectCredentials(String username, User principalUser) {
+        attempts += 1;
+        if (attempts > 2) {
+            bPasswordResetDone = false;
+            principalUser.setEnabled(false);
+            throw new CustomException(HttpStatus.BAD_REQUEST, "Account is locked, please reset the password for user : " + username);
+        }
+        throw new CustomException(HttpStatus.BAD_REQUEST,
+                "Incorrect credentials for username: " + username + ". You have " + (3 - attempts) + " attempts remaining.");
     }
 
     public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
@@ -195,7 +203,7 @@ public class AuthService {
 
     public void setPasswordForUser(User userByToken, String newpassword) {
         userByToken.setPassword(passwordEncoder.encode(newpassword));
+        userByToken.setEnabled(true);
         userRepo.save(userByToken);
-        bPasswordResetDone = true;
     }
 }

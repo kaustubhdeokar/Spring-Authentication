@@ -19,6 +19,7 @@ public class Structure {
     @GeneratedValue
     private Long structureid;
 
+    @Column(unique = true)
     private String structureName;
 
     private String privateData = "privateData";
@@ -43,6 +44,13 @@ public class Structure {
             joinColumns = {@JoinColumn(name = "structureid", referencedColumnName = "structureid")},
             inverseJoinColumns = {@JoinColumn(name = "userid", referencedColumnName = "userid")})
     private Set<User> userWithDeletePerm = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "structure_admin_users",
+            joinColumns = {@JoinColumn(name = "structureid", referencedColumnName = "structureid")},
+            inverseJoinColumns = {@JoinColumn(name = "userid", referencedColumnName = "userid")})
+    private Set<User> userWithAdminPerm = new HashSet<>();
 
     public Structure(String structureName, String privateData) {
         this.structureName = structureName;
