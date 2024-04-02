@@ -18,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,6 +53,9 @@ public class AuthService {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+
+    private static int attempts = 0;
+    private boolean bPasswordResetDone = true;
 
     public boolean signup(RegisterUserDto registerUserDto) throws DataIntegrityViolationException {
 
@@ -99,6 +99,11 @@ public class AuthService {
                 "http://localhost:8080/api/auth/accountVerification/" + token;
     }
 
+    private String formResetPasswordBody(String token) {
+        return "Use following link to reset the password:\n" +
+                "http://localhost:8080/api/auth/completeresetpassword/" + token;
+    }
+
     private String generateVerificationToken(User user) {
         String generatedToken = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken(generatedToken, user, VerificationToken.THREE_DAYS_FROM_TODAY);
@@ -112,6 +117,13 @@ public class AuthService {
         return verificationToken.orElseThrow(() -> new CustomException("Invalid token"));
     }
 
+    public User getUserByToken(String token) {
+        verifyToken(token);
+        //todo: how to optimize this. (Returns an object..)
+        VerificationToken[] tokenObject = tokenRepo.findUserByToken(token);
+        return tokenObject[0].getUser();
+    }
+
     public void enableUserHavingToken(VerificationToken verificationToken) {
         String username = verificationToken.getUser().getUsername();
         User user = userRepo.findByUsername(username).orElseThrow(() -> new CustomException("User not present, invalid token"));
@@ -121,16 +133,32 @@ public class AuthService {
 
     public AuthenticationResponse loginUser(String username, String password) {
 
-        try {
-            Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            String jwtToken = jwtProvider.generateToken(auth);
-            String refreshToken = refreshTokenService.generateRefreshToken().getToken();
-            Instant expiry = Instant.now().plusMillis(jwtProvider.getExpirationDate());
-            return new AuthenticationResponse(username, jwtToken, refreshToken, expiry);
-        } catch (AuthenticationServiceException e) {
-            return new AuthenticationResponse(null, e.getMessage(), null, null);
-        } catch (DisabledException e) {
-            return new AuthenticationResponse(null, "User is disabled. Please verify the user.", null, null);
+        if (bPasswordResetDone) {
+
+            try {
+                Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+                String jwtToken = jwtProvider.generateToken(auth);
+                String refreshToken = refreshTokenService.generateRefreshToken().getToken();
+                Instant expiry = Instant.now().plusMillis(jwtProvider.getExpirationDate());
+                return new AuthenticationResponse(username, jwtToken, refreshToken, expiry);
+            } catch (AuthenticationServiceException e) {
+                return new AuthenticationResponse(null, e.getMessage(), null, null);
+            } catch (DisabledException e) {
+                return new AuthenticationResponse(null, "User is disabled. Please verify the user.", null, null);
+            } catch (BadCredentialsException th) {
+                attempts += 1;
+                if (attempts > 2) {
+                    bPasswordResetDone = false;
+                    throw new CustomException(HttpStatus.BAD_REQUEST,
+                            String.format("Account is locked, please reset the password: ", username));
+                }
+                throw new CustomException(HttpStatus.BAD_REQUEST,
+                        String.format("Incorrect credentials for username: ", username) + ". You have " + (3 - attempts) + " attempts remaining.");
+            }
+
+        } else {
+            throw new CustomException(HttpStatus.BAD_REQUEST,
+                    String.format("Account is locked, please reset the password: ", username));
         }
 
     }
@@ -154,5 +182,20 @@ public class AuthService {
         for (Object role : rolesByUserid.get()) {
             System.out.println(role);
         }
+    }
+
+    public void resetPasswordForEmail(String email) {
+        Optional<User> byEmail = userRepo.findByEmail(email);
+        if (byEmail.isPresent()) {
+            User user = byEmail.get();
+            VerificationToken verificationToken = tokenRepo.findByUser(user).orElseThrow(() -> new CustomException("Not token found for user"));
+            mailService.sendEmail(new NotificationEmail("Account activation", user.getEmail(), formResetPasswordBody(verificationToken.getToken())));
+        }
+    }
+
+    public void setPasswordForUser(User userByToken, String newpassword) {
+        userByToken.setPassword(passwordEncoder.encode(newpassword));
+        userRepo.save(userByToken);
+        bPasswordResetDone = true;
     }
 }

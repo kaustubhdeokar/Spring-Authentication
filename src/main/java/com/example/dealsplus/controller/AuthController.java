@@ -15,9 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin("*")
@@ -66,6 +63,20 @@ public class AuthController {
     public ResponseEntity<String> getRolesForUser(@PathVariable String username) {
         service.getRolesForUser(username);
         return ResponseEntity.status(HttpStatus.OK).body("Roles queried.");
+    }
+
+    @PostMapping("/resetpassword/{email}")
+    //for reset password -
+    public ResponseEntity<String> initiateResetPassword(@PathVariable String email){
+        service.resetPasswordForEmail(email);
+        return ResponseEntity.status(HttpStatus.OK).body("Please check your mail for reset password instructions.");
+    }
+
+    @PostMapping("/completeresetpassword/{token}/{newpassword}")
+    public void completeResetPassword(@PathVariable String token, @PathVariable String newpassword){
+        User userByToken = service.getUserByToken(token);
+        service.setPasswordForUser(userByToken, newpassword);
+
     }
 
 

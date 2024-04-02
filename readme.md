@@ -22,10 +22,9 @@ We are going to develop a compact authentication and authorisation module for De
 
 - Done : Create a User with attributes like username, email, password, roles
 - Done : Implement relevant endpoints for user registration, login, and role management .. 
-- Use Spring Security to secure the endpoints and enforce role-based access control. if you are using a different programming language choose the appropriate framework accordingly
-- Done: Implement password hashing.
+- Done: Implement password hashing
 - Support user account locking after multiple failed login attempts.
-- Implement password reset functionality with 
+- Done: Implement password reset functionality with 
 - Done: email-based verification.
 
 ### **;Evaluation Criteria (non-exhaustive):**
