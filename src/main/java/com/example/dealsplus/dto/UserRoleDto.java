@@ -1,7 +1,6 @@
 package com.example.dealsplus.dto;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,12 +10,10 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StructureDto {
+public class UserRoleDto {
 
+    private String username;
     private String structureName;
+    private String roleName;
 
-    @Override
-    public String toString() {
-        return "structureName='" + structureName + '\'';
-    }
 }

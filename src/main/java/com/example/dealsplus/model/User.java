@@ -4,25 +4,25 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 @Entity
+@Getter
+@Setter
 @Table(name = "user")
 public class User {
     @Id
     @GeneratedValue
-    private Long userid;
+    private Long userId;
     @NotBlank(message = "Username is required")
     private String username;
     @NotBlank(message = "Password is required")
@@ -36,16 +36,15 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "users_roles",
-            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "userid")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "roleid")})
+            joinColumns = {@JoinColumn(name = "userId", referencedColumnName = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "roleId", referencedColumnName = "roleId")})
     private List<Role> roles = new ArrayList<>();
 
-    public User(String username, String password, String email, List<Role> roles) {
+    public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.created = Instant.now();
         this.enabled = false;
-        this.roles = roles;
     }
 }

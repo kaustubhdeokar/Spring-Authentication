@@ -1,6 +1,7 @@
 package com.example.dealsplus.service;
 
 import com.example.dealsplus.exception.CustomException;
+import com.example.dealsplus.model.Role;
 import com.example.dealsplus.model.User;
 import com.example.dealsplus.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +15,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired private UserRepo userRepo;
+    @Autowired
+    private UserRepo userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -33,14 +34,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("User not present!");
         }
         User verifiedUser = user.get();
-        Set<GrantedAuthority> authorities = verifiedUser.getRoles().stream()
-                .map((role) -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toSet());
+        List<Role> roles = verifiedUser.getRoles();
+        List<SimpleGrantedAuthority> collect = roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
 
-        return new org.springframework.security.core.userdetails.
-                User(verifiedUser.getUsername(), verifiedUser.getPassword(),
+        return new org.springframework.security.core.userdetails.User(
+                verifiedUser.getUsername(),
+                verifiedUser.getPassword(),
                 verifiedUser.isEnabled(), true, true, true,
-                authorities);
+                collect);
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {

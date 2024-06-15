@@ -8,7 +8,6 @@ import com.example.dealsplus.model.User;
 import com.example.dealsplus.model.VerificationToken;
 import com.example.dealsplus.service.AuthService;
 import com.example.dealsplus.service.RefreshTokenService;
-import com.example.dealsplus.service.UserDetailsServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,8 +25,6 @@ public class AuthController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    @Autowired private UserDetailsServiceImpl userDetailsService;
-
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody RegisterUserDto registerUserDto) {
         try {
@@ -35,7 +32,7 @@ public class AuthController {
         } catch (DataIntegrityViolationException e) {
             return new ResponseEntity<>("Duplicate username/email.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("Registration done. Check mail to verify signup.", HttpStatus.OK);
+        return new ResponseEntity<>("Registration done.", HttpStatus.OK);
     }
 
     @GetMapping("/accountVerification/{token}")
@@ -62,21 +59,16 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body("Logged out.");
     }
 
-    @GetMapping("/get-roles/{username}")
-    public ResponseEntity<String> getRolesForUser(@PathVariable String username) {
-        service.getRolesForUser(username);
-        return ResponseEntity.status(HttpStatus.OK).body("Roles queried.");
-    }
 
     @PostMapping("/resetpassword/{email}")
     //for reset password -
-    public ResponseEntity<String> initiateResetPassword(@PathVariable String email){
+    public ResponseEntity<String> initiateResetPassword(@PathVariable String email) {
         service.resetPasswordForEmail(email);
         return ResponseEntity.status(HttpStatus.OK).body("Please check your mail for reset password instructions.");
     }
 
     @PostMapping("/completeresetpassword/{token}/{newpassword}")
-    public void completeResetPassword(@PathVariable String token, @PathVariable String newpassword){
+    public void completeResetPassword(@PathVariable String token, @PathVariable String newpassword) {
         User userByToken = service.getUserByToken(token);
         service.setPasswordForUser(userByToken, newpassword);
     }

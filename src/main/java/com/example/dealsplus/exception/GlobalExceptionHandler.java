@@ -1,9 +1,11 @@
 package com.example.dealsplus.exception;
 
+//import io.jsonwebtoken.ExpiredJwtException;
+//import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 @Component
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
+    @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorDetails> handleCustomerAlreadyExistsException(Throwable exception,
                                                                              WebRequest webRequest) {
         ErrorDetails errorDetails = new ErrorDetails(

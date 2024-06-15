@@ -20,9 +20,7 @@ import java.io.IOException;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-
     private final UserDetailsService userDetailsService;
-
 
     public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
@@ -49,10 +47,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
 
-    }
-
-    private boolean isRegisterOrLoginRequest(HttpServletRequest request) {
-        return request.getRequestURI().contains("register") || request.getRequestURI().contains("login");
     }
 
     public String getTokenFromRequest(HttpServletRequest request) {

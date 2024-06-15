@@ -9,7 +9,9 @@ import com.example.dealsplus.repo.UserRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StructureService {
@@ -25,7 +27,7 @@ public class StructureService {
     }
 
     public void createService(StructureDto structure) {
-        Structure map = new Structure(structure.getStructureName(), structure.getPrivateData());
+        Structure map = new Structure(structure.getStructureName());
         saveStructure(map);
     }
 
@@ -47,21 +49,7 @@ public class StructureService {
 
     public StructureDto readStructure(String structureName) {
         Structure structure = getStructure(structureName);
-        return new StructureDto(structure.getStructureName(), structure.getPrivateData());
-    }
-
-    public void addReadPermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = getUser(username);
-        User user = optionalUser.get();
-        structure.getUserWithReadPerm().add(user);
-        saveStructure(structure);
-    }
-
-    public void addWritePermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = getUser(username);
-        User user = optionalUser.get();
-        structure.getUserWithWritePerm().add(user);
-        saveStructure(structure);
+        return new StructureDto(structure.getStructureName());
     }
 
     private Optional<User> getUser(String username) {
@@ -72,17 +60,7 @@ public class StructureService {
         return optionalUser;
     }
 
-    public void addDeletePermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = getUser(username);
-        User user = optionalUser.get();
-        structure.getUserWithDeletePerm().add(user);
-        saveStructure(structure);
-    }
-
-    public void addAdminPermissionForUser(Structure structure, String username) {
-        Optional<User> optionalUser = getUser(username);
-        User user = optionalUser.get();
-        structure.getUserWithAdminPerm().add(user);
-        saveStructure(structure);
+    public List<String> getAll() {
+        return structureRepo.findAll().stream().map(Structure::getStructureName).collect(Collectors.toList());
     }
 }

@@ -4,14 +4,13 @@ import com.example.dealsplus.service.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -38,18 +37,24 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        //noinspection removal
-        http.cors(corsCustomizer()).
-                csrf().disable()
-                .authorizeHttpRequests((authorize) -> {
-                            authorize.requestMatchers("api/auth/**").permitAll();
-                            authorize.anyRequest().authenticated();
-                        }
-                ).httpBasic(Customizer.withDefaults());
+
+        HttpSecurity httpSecurity = http.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> {
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                })
+                .authorizeHttpRequests((requests) ->
+                        requests.requestMatchers("/api/auth/**").permitAll()
+                                .anyRequest().authenticated())
+                .exceptionHandling(exception -> {
+                    exception.authenticationEntryPoint(jwtAuthenticationEntryPoint);
+
+                });
 
         http.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint));
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
+        return httpSecurity.build();
+
 
     }
 
@@ -61,15 +66,15 @@ public class SecurityConfiguration {
         return new ProviderManager(daoProvider);
     }
 
-    @Bean
-    public Customizer<CorsConfigurer<HttpSecurity>> corsCustomizer() {
-        return (corsConfigurer) -> {
-            corsConfigurer.configurationSource(corsConfigurationSource());
-            // You can further customize CORS settings if needed
-            // For example: corsConfigurer.allowedOrigins("http://localhost:3000");
-            // corsConfigurer.allowedMethods("GET", "POST", "PUT", "DELETE");
-        };
-    }
+//    @Bean
+//    public Customizer<CorsConfigurer<HttpSecurity>> corsCustomizer() {
+//        return (corsConfigurer) -> {
+//            corsConfigurer.configurationSource(corsConfigurationSource());
+//            // You can further customize CORS settings if needed
+//            // For example: corsConfigurer.allowedOrigins("http://localhost:3000");
+//            // corsConfigurer.allowedMethods("GET", "POST", "PUT", "DELETE");
+//        };
+//    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

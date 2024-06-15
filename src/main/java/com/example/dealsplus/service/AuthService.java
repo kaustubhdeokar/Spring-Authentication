@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,15 +37,21 @@ public class AuthService {
     @Autowired
     MailService mailService;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private JwtTokenProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
+
+    public AuthService(PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, RoleService roleService) {
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.roleService = roleService;
+    }
+
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
     private RoleRepo roleRepo;
-    @Autowired
-    private JwtTokenProvider jwtProvider;
     @Autowired
     private VerificationTokenRepo tokenRepo;
     Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -62,39 +67,29 @@ public class AuthService {
 
     public boolean signup(RegisterUserDto registerUserDto) throws DataIntegrityViolationException {
 
-        checkIfUserAlreadyExists(registerUserDto);
-        List<Role> roles = new ArrayList<>();
-        RoleService roleService = new RoleService(roleRepo);
-        if (registerUserDto.getUsername().equalsIgnoreCase("ADMIN")) {
-            Role role = roleService.getRole("ADMIN");
-            roles.add(role);
-        } else {
-            Role role = roleService.getRole("USER");
-            roles.add(role);
+        if (ifUserExists(registerUserDto)) {
+            throw new CustomException("User already exists");
         }
+
+        Role basicUserRole = roleService.getRole("USER");
+
         User user = new User(registerUserDto.getUsername(),
                 passwordEncoder.encode(registerUserDto.getPassword()),
-                registerUserDto.getEmail(), roles);
-        userRepo.save(user);
-        logger.info("{}", "User saved.");
+                registerUserDto.getEmail());
+        user.setRoles(List.of(basicUserRole));
 
-        String verificationToken = generateVerificationToken(user);
-        mailService.sendEmail(new NotificationEmail("Account activation", user.getEmail(), formMailBody(verificationToken)));
+        userRepo.save(user);
+
         return true;
     }
 
-    private void checkIfUserAlreadyExists(RegisterUserDto registerDto) {
-        String username = registerDto.getUsername();
-        if (userRepo.existsByUsername(username)) {
-            throw new CustomException(HttpStatus.BAD_REQUEST,
-                    String.format("Username %s exists in the database", username));
+    private boolean ifUserExists(RegisterUserDto registerUserDto) {
+        Optional<User> userByName = userRepo.findByUsername(registerUserDto.getUsername());
+        if (userByName.isEmpty()) {
+            Optional<User> userByEmail = userRepo.findByEmail(registerUserDto.getEmail());
+            return !userByEmail.isEmpty();
         }
-        String email = registerDto.getEmail();
-        if (userRepo.existsByEmail(email)) {
-            throw new CustomException(HttpStatus.BAD_REQUEST,
-                    String.format("Email %s exists in the database", email));
-        }
-
+        return true;
     }
 
     private String formMailBody(String token) {
@@ -142,40 +137,39 @@ public class AuthService {
                 Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
                 String jwtToken = jwtProvider.generateToken(auth);
                 String refreshToken = refreshTokenService.generateRefreshToken().getToken();
-                Instant expiry = Instant.now().plusMillis(jwtProvider.getExpirationDate());
+                Instant expiry = Instant.now().plusMillis(JwtTokenProvider.JWT_EXPIRATION);
                 return new AuthenticationResponse(username, jwtToken, refreshToken, expiry);
             } catch (AuthenticationServiceException e) {
                 return new AuthenticationResponse(null, e.getMessage(), null, null);
             } catch (DisabledException e) {
-                throw new CustomException(HttpStatus.BAD_REQUEST,
-                        "User is disabled. Please verify the user.: " + username);
+                throw new CustomException(HttpStatus.BAD_REQUEST, "User is disabled. Please verify the user.: " + username);
             } catch (BadCredentialsException th) {
-                handleIncorrectCredentials(username, user);
+//                handleIncorrectCredentials(username, user);
                 return new AuthenticationResponse(null, th.getMessage(), null, null);
             }
         } else {
             throw new CustomException(HttpStatus.BAD_REQUEST,
-                    "Account is locked, please reset the password: " + username);
+                    "Account is locked: " + username);
         }
 
     }
 
     private void handleIncorrectCredentials(String username, User principalUser) {
-        attempts += 1;
-        if (attempts > 2) {
-            bPasswordResetDone = false;
-            principalUser.setEnabled(false);
-            throw new CustomException(HttpStatus.BAD_REQUEST, "Account is locked, please reset the password for user : " + username);
-        }
-        throw new CustomException(HttpStatus.BAD_REQUEST,
-                "Incorrect credentials for username: " + username + ". You have " + (3 - attempts) + " attempts remaining.");
+//        attempts += 1;
+//        if (attempts > 2) {
+//            bPasswordResetDone = false;
+//            principalUser.setEnabled(false);
+//            throw new CustomException(HttpStatus.BAD_REQUEST, "Account is locked, please reset the password for user : " + username);
+//        }
+//        throw new CustomException(HttpStatus.BAD_REQUEST,
+//                "Incorrect credentials for username: " + username + ". You have " + (3 - attempts) + " attempts remaining.");
     }
 
     public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
         refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
-        String token = jwtProvider.generateToken(refreshTokenRequest.getUsername());
+        String token = "jwtProvider.generateToken(refreshTokenRequest.getUsername())";
         String refreshToken = refreshTokenRequest.getRefreshToken();
-        Instant expiry = Instant.now().plusMillis(jwtProvider.getExpirationDate());
+        Instant expiry = Instant.now().plusMillis(JwtTokenProvider.JWT_EXPIRATION);
         return new AuthenticationResponse(refreshTokenRequest.getUsername(), token, refreshToken, expiry);
     }
 
@@ -186,7 +180,7 @@ public class AuthService {
 
     public void getRolesForUser(String username) {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new CustomException("User not found with id -" + username));
-        Optional<List<Object[]>> rolesByUserid = userRepo.findRolesByUserid(user.getUserid());
+        Optional<List<Object[]>> rolesByUserid = userRepo.findRolesByUserId(user.getUserId());
         for (Object role : rolesByUserid.get()) {
             System.out.println(role);
         }
