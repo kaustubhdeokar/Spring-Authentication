@@ -2,6 +2,7 @@ package com.example.dealsplus.service;
 
 import com.example.dealsplus.dto.StructureDto;
 import com.example.dealsplus.exception.CustomException;
+import com.example.dealsplus.model.Company;
 import com.example.dealsplus.model.Structure;
 import com.example.dealsplus.repo.StructureRepo;
 import com.example.dealsplus.utils.ConstantUtils;
@@ -16,10 +17,12 @@ public class StructureService {
 
     private final StructureRepo structureRepo;
     private final UserService userService;
+    private final CompanyService companyService;
 
-    public StructureService(StructureRepo structureRepo, UserService userService) {
+    public StructureService(StructureRepo structureRepo, UserService userService, CompanyService companyService) {
         this.structureRepo = structureRepo;
         this.userService = userService;
+        this.companyService = companyService;
     }
 
 
@@ -63,6 +66,15 @@ public class StructureService {
         userService.checkForAuthorization(ConstantUtils.createPermissionForEntity.apply(ConstantUtils.STRUCTURE_ENTITY , ConstantUtils.UPDATE_PERM_STRING));
         Structure structure = getStructure(structureDto.getStructureName());
         structure.setStructureInfo(structureDto.getStructureInfo());
+        structureRepo.save(structure);
+    }
+
+
+
+    public void addCompanyToStructure(String companyName, String structureName) {
+        Structure structure = getStructure(structureName);
+        Company company = companyService.getCompany(companyName);
+        structure.getCompanies().add(company);
         structureRepo.save(structure);
     }
 }

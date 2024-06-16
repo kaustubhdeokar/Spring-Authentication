@@ -22,6 +22,11 @@ public class Structure {
 
     private String structureInfo;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "structure_company",
+            joinColumns = {@JoinColumn(name = "structureId", referencedColumnName = "structureId")},
+            inverseJoinColumns = {@JoinColumn(name = "companyId", referencedColumnName = "companyId")})
+    private List<Company> companies;
 
     public Structure(String structureName) {
         this.structureName = structureName;

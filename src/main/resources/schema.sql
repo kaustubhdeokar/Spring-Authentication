@@ -10,7 +10,9 @@ insert IGNORE into roles (name) values ('STRUCTURE_READ_AUTHORITY');
 insert IGNORE into roles (name) values ('STRUCTURE_EDIT_AUTHORITY');
 insert IGNORE into roles (name) values ('STRUCTURE_ADMIN_AUTHORITY');
 insert IGNORE into roles (name) values ('STRUCTURE_DELETE_AUTHORITY');
-
+insert IGNORE into roles (name) values ('COMPANY_READ_AUTHORITY');
+insert IGNORE into roles (name) values ('COMPANY_EDIT_AUTHORITY');
+insert IGNORE into roles (name) values ('COMPANY_ADMIN_AUTHORITY');
 -- super: admin
 insert IGNORE into roles (name) values ('ADMIN');
 

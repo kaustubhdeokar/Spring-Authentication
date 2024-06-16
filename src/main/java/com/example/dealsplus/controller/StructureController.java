@@ -1,5 +1,6 @@
 package com.example.dealsplus.controller;
 
+import com.example.dealsplus.dto.StructureCompanyDto;
 import com.example.dealsplus.dto.StructureDto;
 import com.example.dealsplus.model.Structure;
 import com.example.dealsplus.service.StructureService;
@@ -41,7 +42,7 @@ public class StructureController {
         return new ResponseEntity<>(structureDto, HttpStatus.OK);
     }
 
-    @PostMapping("/read/{structureName}")
+    @GetMapping("/read/{structureName}")
     public ResponseEntity<StructureDto> readStructure(@PathVariable String structureName) {
         StructureDto structureDto = structureService.readStructure(structureName);
         return new ResponseEntity<>(structureDto, HttpStatus.OK);
@@ -63,5 +64,12 @@ public class StructureController {
     public ResponseEntity<String> deleteStructure(@PathVariable String structureName) {
         structureService.deleteStructure(structureName);
         return new ResponseEntity<>("Structure deleted.", HttpStatus.OK);
+    }
+
+    @PostMapping("/assign/company")
+    public ResponseEntity<String> assignCompanyToStructure(@RequestBody StructureCompanyDto structureCompanyDto) {
+        structureService.addCompanyToStructure(structureCompanyDto.getCompanyName(), structureCompanyDto.getStructureName());
+        return ResponseEntity.status(HttpStatus.OK).body("Company: " + structureCompanyDto.getCompanyName() +
+                " added for Structure: " + structureCompanyDto.getStructureName());
     }
 }

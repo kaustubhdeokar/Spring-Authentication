@@ -15,6 +15,7 @@ public class ConstantUtils {
     public static final String CREATE_PERM_STRING = "create";
     public static final String DELETE_PERM_STRING = "delete";
     public static final String STRUCTURE_ENTITY = "structure";
+    public static final String COMPANY_ENTITY = "company";
 
     public static final BiFunction<String, String, String> createPermissionForEntity = (entity, permission) -> String.join(":", entity, permission);
 
