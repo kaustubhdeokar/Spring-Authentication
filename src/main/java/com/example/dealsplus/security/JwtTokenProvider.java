@@ -1,15 +1,11 @@
 package com.example.dealsplus.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +15,6 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-import java.util.function.Supplier;
 
 @Service
 @Getter

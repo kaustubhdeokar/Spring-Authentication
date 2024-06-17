@@ -1,0 +1,262 @@
+{
+	"info": {
+		"_postman_id": "cf217f5b-adb5-4a82-a9f8-afe2bc7f8f9a",
+		"name": "dealsplus",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "7749014"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"company_admin@mail.com\",\n    \"username\":\"company_admin\",\n    \"password\":\"company_admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/auth/signup"
+					},
+					"response": []
+				},
+				{
+					"name": "reset",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": "localhost:8080/api/auth/resetpassword/kaustubhdcpo@gmail.com"
+					},
+					"response": []
+				},
+				{
+					"name": "complete reset",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": "http://localhost:8080/api/auth/completeresetpassword/9ac08d64-b633-4a5c-9371-abb92deb59a5/kaustubhdcpo"
+					},
+					"response": []
+				},
+				{
+					"name": "accountVerification",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/auth/accountVerification/a269f3ec-52d6-4a3f-8586-18a801f47413"
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"structure_read\",\n    \"password\":\"structure_read\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/api/auth/login"
+					},
+					"response": []
+				},
+				{
+					"name": "assign roles for user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcxODUyMTk0NywiZXhwIjoxNzE4OTUzOTQ3fQ.NXCUSMsMjaI-gIK4OKOvch8PB6iMhyzxnP80TE0aH-Y"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\":\"COMPANY_ADMIN_AUTHORITY\",\n    \"user\":\"company_admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/assign/"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Structure",
+			"item": [
+				{
+					"name": "struture create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJ1Y3R1cmVfZWRpdCIsImlhdCI6MTcxODUzNDkxMywiZXhwIjoxNzE4OTY2OTEzfQ.5PaAPrwUkAaNPTAqyZhBVuKEZwWm-Ddvb-BYiZV6ou8"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"structureName\":\"structure-4-from-structure-admin\",\n    \"structureInfo\":\"structure-4-info\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/structure/create"
+					},
+					"response": []
+				},
+				{
+					"name": "get-all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJ1Y3R1cmVfZWRpdCIsImlhdCI6MTcxODUzNDkxMywiZXhwIjoxNzE4OTY2OTEzfQ.5PaAPrwUkAaNPTAqyZhBVuKEZwWm-Ddvb-BYiZV6ou8"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/api/structure/get-all"
+					},
+					"response": []
+				},
+				{
+					"name": "structure-delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJ1Y3R1cmVfZWRpdCIsImlhdCI6MTcxODUzNDkxMywiZXhwIjoxNzE4OTY2OTEzfQ.5PaAPrwUkAaNPTAqyZhBVuKEZwWm-Ddvb-BYiZV6ou8"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"url": "localhost:8080/api/structure/delete/structure-4-from-structure-admin"
+					},
+					"response": []
+				},
+				{
+					"name": "structure-edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJ1Y3R1cmVfZWRpdCIsImlhdCI6MTcxODUzNDkxMywiZXhwIjoxNzE4OTY2OTEzfQ.5PaAPrwUkAaNPTAqyZhBVuKEZwWm-Ddvb-BYiZV6ou8"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"structureName\":\"structure-3-from-structure-admin\",\n    \"structureInfo\":\"structure-3-info-edited-2-by-structure_edit_user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/structure/edit"
+					},
+					"response": []
+				},
+				{
+					"name": "assign-company",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjb21wYW55X2FkbWluIiwiaWF0IjoxNzE4NTM4NjEzLCJleHAiOjE3MTg5NzA2MTN9.aF_4q3P8zFEJpPGkr40_s0tfqdJPSMGrqpF_PTnks5M"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"structureName\":\"struct:1\",\n    \"companyName\": \"c100\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/structure/assign/company"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Company",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjb21wYW55X2FkbWluIiwiaWF0IjoxNzE4NTM4NjEzLCJleHAiOjE3MTg5NzA2MTN9.aF_4q3P8zFEJpPGkr40_s0tfqdJPSMGrqpF_PTnks5M"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"companyName\":\"c302\",\n    \"companyInfo\":\"company-302\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/company/create"
+					},
+					"response": []
+				},
+				{
+					"name": "get-all",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJ1Y3R1cmVfcmVhZCIsImlhdCI6MTcxODU0MjY2OSwiZXhwIjoxNzE4OTc0NjY5fQ.rT2pcvt2YlpT3JK6a-uV1EEDaJ61Um9zTF0Iv6ramvo"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/api/company/get-all"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
